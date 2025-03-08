@@ -4,6 +4,7 @@
         "npm": ">=10.x"
     },
     "dependencies": {
+        "express": "^4.21.2",
         "statsig-node-lite": "^0.4.2"
     }
 }
