@@ -5,6 +5,7 @@
     },
     "dependencies": {
         "express": "^4.21.2",
+        "mysql2": "^3.13.0",
         "statsig-node-lite": "^0.4.2"
     }
 }
