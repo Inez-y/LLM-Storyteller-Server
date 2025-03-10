@@ -54,7 +54,7 @@ async function startServer() {
           return res.status(401).json({ error: 'Invalid username or password'});
         }
 
-        const token = jwt.sign({ id: user.id, username: user.username}, SECRET_KEY_JWT, {expiresIn: '1h'});
+        const token = jwt.sign({ id: user.id, username: user.username}, SECRET_KEY, {expiresIn: '1h'});
 
         res.cookie('auth-token',token, {
           httpOnly: true,
@@ -67,6 +67,33 @@ async function startServer() {
       }
     });
 
+    app.post('/register', async (req, res) => {
+      const { username, password } = req.body;
+    
+      try {
+        // Check if the username already exists in the database
+        const [existingUsers] = await connection.execute(
+          'SELECT * FROM users WHERE username = ?',
+          [username]
+        );
+        
+        if (existingUsers.length > 0) {
+          return res.status(400).json({ error: 'Username already exists' });
+        }
+        
+        // Insert new user into the database
+        const [result] = await connection.execute(
+          'INSERT INTO users (username, password) VALUES (?, ?)',
+          [username, password]
+        );
+        
+        res.status(201).json({ message: 'User registered successfully', userId: result.insertId });
+      } catch (error) {
+        console.error('Registration error:', error);
+        res.status(500).json({ error: 'Registration failed' });
+      }
+    });
+    
     // Start the Express server.
     const PORT = process.env.APP_PORT || 3000;
     app.listen(PORT, () => {
