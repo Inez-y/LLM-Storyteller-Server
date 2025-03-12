@@ -4,6 +4,7 @@ const mysql = require('mysql2/promise');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
 
 const app = express();
 app.use(express.json());
@@ -49,8 +50,9 @@ async function startServer() {
         }
 
         const user = rows[0];
+        const isPWValid = await bcrypt.compare(password, user.password);
 
-        if (user.password !== password) {
+        if (!isPWValid) {
           return res.status(401).json({ error: 'Invalid username or password'});
         }
 
@@ -80,11 +82,14 @@ async function startServer() {
         if (existingUsers.length > 0) {
           return res.status(400).json({ error: 'Username already exists' });
         }
+
+        // hashing pw
+        const hashedPW = await bcrypt.hash(password, 10);
         
         // Insert new user into the database
         const [result] = await connection.execute(
           'INSERT INTO users (username, password) VALUES (?, ?)',
-          [username, password]
+          [username, hashedPW]
         );
         
         res.status(201).json({ message: 'User registered successfully', userId: result.insertId });
