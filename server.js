@@ -32,6 +32,10 @@ async function startServer() {
     const sql = postgres(connectionString);
     console.log('Connected to the database!');
 
+    app.get('/', (req, res) => {
+      res.status(200).send('OK');
+    });    
+
     // Define a route that queries the database.
     app.get('/get-users', async (req, res) => {
       try {
@@ -103,10 +107,11 @@ async function startServer() {
     });
     
     // Start the Express server.
-    const PORT = process.env.APP_PORT || 3000;
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+    const port = process.env.PORT || 3000;
+    app.listen(port, '0.0.0.0', () => {
+      console.log(`Server running on port ${port}`);
     });
+
   } catch (err) {
     console.error('Error connecting to the database:', err);
   }
