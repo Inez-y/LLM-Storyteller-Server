@@ -1,10 +1,11 @@
 require('dotenv').config();
 import express, { json } from 'express';
 import { createConnection } from 'mysql2/promise';
-import { sign } from 'jsonwebtoken';
+import jsonpkg from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
+const { sign } = jsonpkg;
 const app = express();
 app.use(json());
 app.use(cookieParser());
