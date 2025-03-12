@@ -63,7 +63,8 @@ async function startServer() {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production'
         });
-        res.json({ message: 'Logged in successfully' });
+        const isAdmin = user.isAdmin ? true : false;
+        res.json({ message: 'Logged in successfully' ,isAdmin: isAdmin});
       } catch (error) {
         console.error('Database query error:', error);
         res.status(500).json({ error: 'Database query error' });
