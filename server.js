@@ -10,6 +10,12 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors());
 
+app.use(cors({
+  origin: 'https://storyteller-us7ph.ondigitalocean.app/',  // specify the allowed origin
+  credentials: true
+}));
+
+
 const SECRET_KEY = process.env.SECRET_KEY_JWT;
 
 async function startServer() {
