@@ -4,6 +4,11 @@ import { createConnection } from 'mysql2/promise';
 import jsonpkg from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import postgres from 'postgres'
+
+const connectionString = process.env.DATABASE_URL
+
+
 
 const { sign } = jsonpkg;
 const app = express();
@@ -24,19 +29,13 @@ const SECRET_KEY = process.env.SECRET_KEY_JWT;
 async function startServer() {
   try {
     // Establish a connection to the database using environment variables.
-    const connection = await createConnection({
-      host: process.env.HOST,
-      user: process.env.USERNAME,       // Map USERNAME to user
-      password: process.env.PASSWORD,
-      database: process.env.DATABASE,
-      port: process.env.DB_PORT,
-    });
+    const sql = postgres(connectionString);
     console.log('Connected to the database!');
 
     // Define a route that queries the database.
     app.get('/get-users', async (req, res) => {
       try {
-        const [rows] = await connection.execute('SELECT * FROM users');
+        const [rows] = await sql.execute('SELECT * FROM users');
         res.json(rows);
       } catch (error) {
         console.error('Error executing query:', error);
@@ -48,7 +47,7 @@ async function startServer() {
       const { username,password } = req.body;
 
       try {
-        const [rows] = await connection.execute(
+        const [rows] = await sql.execute(
           `SELECT * FROM users WHERE username = ?`, 
           [username]
         );
@@ -81,7 +80,7 @@ async function startServer() {
     
       try {
         // Check if the username already exists in the database
-        const [existingUsers] = await connection.execute(
+        const [existingUsers] = await sql.execute(
           'SELECT * FROM users WHERE username = ?',
           [username]
         );
@@ -91,7 +90,7 @@ async function startServer() {
         }
         
         // Insert new user into the database
-        const [result] = await connection.execute(
+        const [result] = await sql.execute(
           'INSERT INTO users (username, password) VALUES (?, ?)',
           [username, password]
         );
