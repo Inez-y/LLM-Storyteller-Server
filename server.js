@@ -17,10 +17,6 @@ app.use(cors({
   credentials: true
 }));
 
-// Optional: Explicitly handle OPTIONS requests for all routes.
-app.options('*', cors());
-
-
 const SECRET_KEY = process.env.SECRET_KEY_JWT;
 
 async function startServer() {
