@@ -13,6 +13,7 @@
         "express": "^4.21.2",
         "jsonwebtoken": "^9.0.2",
         "mysql2": "^3.13.0",
+        "postgres": "^3.4.5",
         "statsig-node-lite": "^0.4.2"
     },
     "scripts": {
