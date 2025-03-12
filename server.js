@@ -39,7 +39,7 @@ async function startServer() {
     // Define a route that queries the database.
     app.get('/get-users', async (req, res) => {
       try {
-        const [rows] = await sql.execute('SELECT * FROM users');
+        const [rows] = await sql`SELECT * FROM users`;
         res.json(rows);
       } catch (error) {
         console.error('Error executing query:', error);
@@ -48,64 +48,56 @@ async function startServer() {
     });
 
     app.post('/login', async (req, res) => {
-      const { username,password } = req.body;
-
+      const { username, password } = req.body;
       try {
-        const [rows] = await sql.execute(
-          `SELECT * FROM users WHERE username = ?`, 
-          [username]
-        );
-
+        // Parameterized query using template literals
+        const rows = await sql`SELECT * FROM users WHERE username = ${username}`;
+        
         if (rows.length === 0) {
-          return res.status(401).json({ error: 'Invalid username or password'});
+          return res.status(401).json({ error: 'Invalid username or password' });
         }
-
+    
         const user = rows[0];
-
+    
         if (user.password !== password) {
-          return res.status(401).json({ error: 'Invalid username or password'});
+          return res.status(401).json({ error: 'Invalid username or password' });
         }
-
-        const token = sign({ id: user.id, username: user.username}, SECRET_KEY, {expiresIn: '1h'});
-
-        res.cookie('auth-token',token, {
+    
+        const token = sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
+    
+        res.cookie('auth-token', token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production'
         });
-        res.json({message: 'Logged in successfully'});
+    
+        res.json({ message: 'Logged in successfully' });
       } catch (error) {
-        console.error('Database query error: ', error);
-        res.status(500).json({error: 'Database query error'});
+        console.error('Database query error:', error);
+        res.status(500).json({ error: 'Database query error' });
       }
     });
-
     app.post('/register', async (req, res) => {
       const { username, password } = req.body;
-    
+
       try {
-        // Check if the username already exists in the database
-        const [existingUsers] = await sql.execute(
-          'SELECT * FROM users WHERE username = ?',
-          [username]
-        );
-        
+        // Check if the username already exists
+        const existingUsers = await sql`SELECT * FROM users WHERE username = ${username}`;
+
         if (existingUsers.length > 0) {
           return res.status(400).json({ error: 'Username already exists' });
         }
-        
-        // Insert new user into the database
-        const [result] = await sql.execute(
-          'INSERT INTO users (username, password) VALUES (?, ?)',
-          [username, password]
-        );
-        
-        res.status(201).json({ message: 'User registered successfully', userId: result.insertId });
+
+        // Insert new user and return the inserted id.
+        const result = await sql`INSERT INTO users (username, password) VALUES (${username}, ${password}) RETURNING id`;
+
+        // result is an array; return the id of the inserted user.
+        res.status(201).json({ message: 'User registered successfully', userId: result[0].id });
       } catch (error) {
         console.error('Registration error:', error);
         res.status(500).json({ error: 'Registration failed' });
       }
     });
-    
+
     // Start the Express server.
     const port = process.env.PORT || 3000;
     app.listen(port, '0.0.0.0', () => {
