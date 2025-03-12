@@ -9,10 +9,17 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
+// Configure CORS for your specific client origin and enable credentials if needed.
 app.use(cors({
-  origin: 'https://storyteller-us7ph.ondigitalocean.app', // exact match
+  origin: 'https://storyteller-us7ph.ondigitalocean.app', // Exact match required when using credentials.
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
+
+// Optional: Explicitly handle OPTIONS requests for all routes.
+app.options('*', cors());
+
 
 const SECRET_KEY = process.env.SECRET_KEY_JWT;
 
