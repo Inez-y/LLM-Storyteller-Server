@@ -8,13 +8,11 @@ const cors = require('cors');
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors());
 
 app.use(cors({
-  origin: 'https://storyteller-us7ph.ondigitalocean.app/',  // specify the allowed origin
+  origin: 'https://storyteller-us7ph.ondigitalocean.app', // exact match
   credentials: true
 }));
-
 
 const SECRET_KEY = process.env.SECRET_KEY_JWT;
 
