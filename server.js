@@ -1,12 +1,12 @@
 require('dotenv').config();
-const express = require('express');
-const mysql = require('mysql2/promise');
-const jwt = require('jsonwebtoken');
-const cookieParser = require('cookie-parser');
-const cors = require('cors');
+import express, { json } from 'express';
+import { createConnection } from 'mysql2/promise';
+import { sign } from 'jsonwebtoken';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
 
 const app = express();
-app.use(express.json());
+app.use(json());
 app.use(cookieParser());
 
 // Configure CORS for your specific client origin and enable credentials if needed.
@@ -22,7 +22,7 @@ const SECRET_KEY = process.env.SECRET_KEY_JWT;
 async function startServer() {
   try {
     // Establish a connection to the database using environment variables.
-    const connection = await mysql.createConnection({
+    const connection = await createConnection({
       host: process.env.HOST,
       user: process.env.USERNAME,       // Map USERNAME to user
       password: process.env.PASSWORD,
@@ -61,7 +61,7 @@ async function startServer() {
           return res.status(401).json({ error: 'Invalid username or password'});
         }
 
-        const token = jwt.sign({ id: user.id, username: user.username}, SECRET_KEY, {expiresIn: '1h'});
+        const token = sign({ id: user.id, username: user.username}, SECRET_KEY, {expiresIn: '1h'});
 
         res.cookie('auth-token',token, {
           httpOnly: true,
