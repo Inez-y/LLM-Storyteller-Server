@@ -29,7 +29,7 @@ async function startServer() {
       user: process.env.USERNAME,       // Map USERNAME to user
       password: process.env.PASSWORD,
       database: process.env.DATABASE,
-      port: process.env.PORT,
+      port: process.env.DB_PORT,
     });
     console.log('Connected to the database!');
 
