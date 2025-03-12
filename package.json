@@ -1,6 +1,6 @@
 {
     "engines": {
-        "node": ">=18.x",
+        "node": ">=14.x",
         "npm": ">=10.x"
     },
     "dependencies": {
@@ -10,5 +10,8 @@
         "jsonwebtoken": "^9.0.2",
         "mysql2": "^3.13.0",
         "statsig-node-lite": "^0.4.2"
+    },
+    "scripts": {
+        "start": "node server.js"
     }
 }
