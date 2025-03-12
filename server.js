@@ -19,8 +19,6 @@ async function startServer() {
       password: process.env.PASSWORD,
       database: process.env.DATABASE,
       port: process.env.PORT,
-      // Configure SSL if required
-      ssl: process.env.SSLMODE === 'require' ? { rejectUnauthorized: false } : null
     });
     console.log('Connected to the database!');
 
