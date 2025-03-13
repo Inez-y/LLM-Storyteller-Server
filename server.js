@@ -95,7 +95,7 @@ async function startServer() {
       }
     });
 
-    app.get('/generate-text', async (req, res) => {
+    app.get('/generate-txt', async (req, res) => {
       const { prompt } = req.query;
       try {
         const response = await axios.get('https://storyteller-us7ph.ondigitalocean.app/generate-txt', {
