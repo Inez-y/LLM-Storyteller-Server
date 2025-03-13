@@ -22,6 +22,9 @@ async def generate_story(prompt: str = "Three cats are"):
         "generated_text": generated_text
     }
 
+# you may need to type command if requirements.txt not work fully
+# pip install uvicorn
+
 # start server:
 # uvicorn model_api:app --reload --log-level debug
 
