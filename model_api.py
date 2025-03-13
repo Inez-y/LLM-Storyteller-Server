@@ -4,7 +4,6 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 import os
 import time
 
-app = FastAPI()
 model_path = os.path.abspath("./mpt-7b-storywriter")
 os.environ["HUGGINGFACE_HUB_CACHE"] = model_path
 model_name = "mosaicml/mpt-7b-storywriter"
