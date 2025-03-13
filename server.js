@@ -98,7 +98,7 @@ async function startServer() {
     app.get('/generate-text', async (req, res) => {
       const { prompt } = req.query;
       try {
-        const response = await axios.get('https://storybear-api-xkt3r.ondigitalocean.app/generate_story', {
+        const response = await axios.get('https://storyteller-us7ph.ondigitalocean.app/generate-txt', {
           params: { prompt }
         });
         res.json(response.data);
