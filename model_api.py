@@ -22,4 +22,8 @@ async def generate_story(prompt: str = "Three cats are"):
         "generated_text": generated_text
     }
 
+# start server:
+# uvicorn model_api:app --reload --log-level debug
+
+# query via url
 # http://url:8000/generate_story?prompt=Three%20cats%20are
