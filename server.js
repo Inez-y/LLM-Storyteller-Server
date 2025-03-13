@@ -10,6 +10,8 @@ import postgres from 'postgres';
 const connectionString = process.env.DATABASE_URL;
 const { sign } = jsonpkg;
 const app = express();
+const axios = require('axios');
+
 
 app.use(json());
 app.use(cookieParser());
@@ -92,6 +94,20 @@ async function startServer() {
         res.status(500).json({ error: 'Registration failed' });
       }
     });
+
+    app.get('/generate-text', async (req, res) => {
+      const { prompt } = req.query;
+      try {
+        const response = await axios.get('https://storybear-api-xkt3r.ondigitalocean.app/generate_story', {
+          params: { prompt }
+        });
+        res.json(response.data);
+      } catch (error) {
+        console.error('Error calling Python API:', error);
+        res.status(500).send('Error generating text');
+      }
+    });
+
 
     // Start the Express server.
     const port = process.env.PORT || 3000;
