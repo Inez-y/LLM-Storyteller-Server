@@ -103,10 +103,10 @@ async function startServer() {
       }
     });
 
-    app.get('/generate-txt', async (req, res) => {
+    app.get('/generate_txt', async (req, res) => {
       const { prompt } = req.query;
       try {
-        const response = await axios.get('https://storyteller-us7ph.ondigitalocean.app/generate-txt', {
+        const response = await axios.get('https://storybear-api-xkt3r.ondigitalocean.app/generate_txt', {
           params: { prompt }
         });
         res.json(response.data);
