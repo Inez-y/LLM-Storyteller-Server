@@ -78,6 +78,11 @@ async function startServer() {
       }
     });
 
+    app.get('/logout', (req, res) => {
+      res.clearCookie('auth-token');
+      res.redirect('https://storyteller-us7ph.ondigitalocean.app/');
+    });
+
     // Register endpoint using a parameterized INSERT query with RETURNING clause
     app.post('/register', async (req, res) => {
       const { username, password } = req.body;
