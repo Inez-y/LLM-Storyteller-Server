@@ -63,8 +63,15 @@ async function startServer() {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production'
         });
+
         const isAdmin = user.isAdmin ? true : false;
-        res.json({ message: 'Logged in successfully' ,isAdmin: isAdmin});
+        // res.json({ message: 'Logged in successfully' ,isAdmin: isAdmin});
+        if (isAdmin) {
+          res.redirect('https://storyteller-us7ph.ondigitalocean.app/html/dashboard.html')
+
+        } else {
+          res.redirect('https://storyteller-us7ph.ondigitalocean.app/html/landing.html')
+        }
       } catch (error) {
         console.error('Database query error:', error);
         res.status(500).json({ error: 'Database query error' });
