@@ -104,7 +104,9 @@ async function startServer() {
     // gpt server
     app.post('/landing', async(req, res) => {
       console.log("Connecting to GPT...");
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_KEY });
+      const OpenAI = require('openai-api'); // wrapper
+      const openai = new OpenAI(process.env.OPENAI_KEY);
+      console.log(openai);
 
       try {
         const response = await openai.chat.completions.create({
