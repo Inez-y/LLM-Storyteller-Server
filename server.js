@@ -114,7 +114,7 @@ async function startServer() {
             content: "Hello!" || req.body.prompt 
           }],
         });
-        const answer = completion.choices[0].message.content;
+        const answer = response.choices[0].message.content;
         console.log("GPT answered: ", answer);
         res.json(answer);
       } catch (error) {
