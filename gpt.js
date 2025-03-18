@@ -1,14 +1,28 @@
 import OpenAI from "openai";
-const client = new OpenAI();
+import express from "express";
+import dotenv from "dotenv";
 
-const completion = await client.chat.completions.create({
-    model: "gpt-4o",
-    messages: [
-        {
-            role: "user",
-            content: "Write a one-sentence bedtime story about a unicorn.",
-        },
-    ],
+const app = express();
+const port = 3000;
+
+app.use(express.json());
+
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+
+app.post("/generate", async (req, res) => {
+    try {
+        const response = await openai.chat.completions.create({
+            model: "gpt-4",
+            messages: [{ role: "user", content: req.body.prompt }],
+        });
+        res.json(response);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
-console.log(completion.choices[0].message.content);
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});
