@@ -12,7 +12,7 @@ const connectionString = process.env.DATABASE_URL;
 const { sign } = jsonpkg;
 const app = express();
 
-app.use(json());
+app.use(express.json()); // add express
 app.use(cookieParser());
 
 // Configure CORS for your specific client origin and enable credentials if needed.
@@ -117,7 +117,7 @@ async function startServer() {
         if (!response.choices || response.choices.length === 0) {
           return res.status(500).json({ error: "No response from GPT." });
         }
-        
+
         const answer = response.choices[0].message.content;
         console.log("GPT answered:", answer);
         res.json({ response: answer });  // Send response as JSON
