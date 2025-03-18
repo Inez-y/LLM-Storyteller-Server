@@ -6,6 +6,7 @@ import jsonpkg from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import postgres from 'postgres';
+import openai from 'opneai';
 
 const connectionString = process.env.DATABASE_URL;
 const { sign } = jsonpkg;
@@ -97,6 +98,22 @@ async function startServer() {
       } catch (error) {
         console.error('Registration error:', error);
         res.status(500).json({ error: 'Registration failed' });
+      }
+    });
+
+    // gpt server
+    app.post('/landing', async(req, res) => {
+      console.log("Connecting to GPT...");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_KEY });
+
+      try {
+        const response = await openai.chat.completions.create({
+          model: "gpt-4",
+          messages: [{ role: "user", content: req.body.prompt }],
+        });
+        res.json(response);
+      } catch (error) {
+        res.status(500).json( { error: error.message });
       }
     });
 
