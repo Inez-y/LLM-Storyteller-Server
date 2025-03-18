@@ -125,7 +125,7 @@ async function startServer() {
               return res.status(500).json({ error: "No response from GPT." });
           }
   
-          const answer = response.choices[0].message.content || "No text response";
+          const answer = response.choices[0].message.audio?.transcript || "No text response";
           const answer_voice = response.choices[0].message.audio?.data || null;
   
           console.log("GPT Answer:", answer);
