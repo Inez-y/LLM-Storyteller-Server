@@ -109,8 +109,11 @@ async function startServer() {
       try {
         const userPrompt = req.body.prompt;
         const response = await client.chat.completions.create({
-          model: "gpt-4",
+          model: "gpt-4o-audio-preview",
+          modalities: ["text", "audio"],
+          audio: { voice: "alloy", format: "wav" },
           messages: [{ role: "user", content: userPrompt }],
+          store: true,
         });
 
         // Ensure response contains a valid message
@@ -118,7 +121,8 @@ async function startServer() {
           return res.status(500).json({ error: "No response from GPT." });
         }
 
-        const answer = response.choices[0].message.content;
+        // const answer = response.choices[0].message.content;
+        const answer = response.choices[0];
         console.log("GPT answered:", answer);
         res.json({ response: answer });  // Send response as JSON
       } catch (error) {
