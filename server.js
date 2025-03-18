@@ -6,7 +6,7 @@ import jsonpkg from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import postgres from 'postgres';
-import openai from 'opneai';
+import OpenAI from 'openai';
 
 const connectionString = process.env.DATABASE_URL;
 const { sign } = jsonpkg;
@@ -104,16 +104,19 @@ async function startServer() {
     // gpt server
     app.post('/landing', async(req, res) => {
       console.log("Connecting to GPT...");
-      const OpenAI = require('openai-api'); // wrapper
-      const openai = new OpenAI(process.env.OPENAI_KEY);
-      console.log(openai);
+      const client = new OpenAI({ apiKey: process.env.OPENAI_KEY });
 
       try {
-        const response = await openai.chat.completions.create({
+        const response = await client.chat.completions.create({
           model: "gpt-4",
-          messages: [{ role: "user", content: req.body.prompt }],
+          messages: [{ 
+            role: "user", 
+            content: "Hello!" || req.body.prompt 
+          }],
         });
-        res.json(response);
+        const answer = completion.choices[0].message.content;
+        console.log("GPT answered: ", answer);
+        res.json(answer);
       } catch (error) {
         res.status(500).json( { error: error.message });
       }
