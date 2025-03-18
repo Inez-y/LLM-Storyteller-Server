@@ -124,8 +124,9 @@ async function startServer() {
         const answer = response.choices[0].message.content;
         const answer_voice = response.choices[0].message.audio.data;
         console.log("GPT answered:", answer);
-        res.json({ response: answer, audio: answer_voice });  // Send response as JSON
         
+        res.json({ response: answer });  // Send response as JSON
+
       } catch (error) {
         res.status(500).json({ error: error.message });
       }
