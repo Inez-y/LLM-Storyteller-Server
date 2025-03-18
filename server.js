@@ -107,16 +107,20 @@ async function startServer() {
       const client = new OpenAI({ apiKey: process.env.OPENAI_KEY });
 
       try {
+        const userPrompt = req.body.prompt;
         const response = await client.chat.completions.create({
           model: "gpt-4",
-          messages: [{ 
-            role: "user", 
-            content: "Hello!" || req.body.prompt 
-          }],
+          messages: [{ role: "user", content: userPrompt }],
         });
+
+        // Ensure response contains a valid message
+        if (!response.choices || response.choices.length === 0) {
+          return res.status(500).json({ error: "No response from GPT." });
+        }
+        
         const answer = response.choices[0].message.content;
-        console.log("GPT answered: ", answer);
-        res.json(answer);
+        console.log("GPT answered:", answer);
+        res.json({ response: answer });  // Send response as JSON
       } catch (error) {
         res.status(500).json( { error: error.message });
       }
