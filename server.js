@@ -102,33 +102,40 @@ async function startServer() {
     });
 
     // gpt server
-    app.post('/landing', async(req, res) => {
+    app.post('/landing', async (req, res) => {
       console.log("Connecting to GPT...");
       const client = new OpenAI({ apiKey: process.env.OPENAI_KEY });
-
+  
       try {
-        const userPrompt = req.body.prompt;
-        const response = await client.chat.completions.create({
-          model: "gpt-4o-audio-preview",
-          modalities: ["text", "audio"],
-          audio: { voice: "alloy", format: "wav" },
-          messages: [{ role: "user", content: userPrompt }],
-          store: true,
-        });
-
-        // Ensure response contains a valid message
-        if (!response.choices || response.choices.length === 0) {
-          return res.status(500).json({ error: "No response from GPT." });
-        }
-
-        const answer = response.choices[0].message.content;
-        const answer_voice = response.choices[0].message.audio.data;
-        console.log("GPT answered:", answer);
-        
-        res.json({ response: answer });  // Send response as JSON
-
+          const userPrompt = req.body.prompt;
+          const response = await client.chat.completions.create({
+              model: "gpt-4o-audio-preview",
+              modalities: ["text", "audio"],
+              audio: { voice: "alloy", format: "wav" },
+              messages: [
+                { role: "system", content: "Text Response" },
+                { role: "user", content: userPrompt }
+              ],
+              store: true,
+          });
+  
+          console.log("Full GPT response:", JSON.stringify(response, null, 2));
+  
+          if (!response.choices || response.choices.length === 0) {
+              return res.status(500).json({ error: "No response from GPT." });
+          }
+  
+          const answer = response.choices[0].message.content || "No text response";
+          const answer_voice = response.choices[0].message.audio?.data || null;
+  
+          console.log("GPT Answer:", answer);
+          console.log("Audio Base64:", answer_voice ? "Received" : "Not received");
+  
+          res.json({ response: answer, audio: answer_voice });
+  
       } catch (error) {
-        res.status(500).json({ error: error.message });
+          console.error("Error:", error);
+          res.status(500).json({ error: error.message });
       }
     });
 
