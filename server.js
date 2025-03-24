@@ -49,7 +49,7 @@ async function startServer() {
 
     app.get('/get-user-usage', async (req, res) => {
       try {
-        const usage = await sql`SELECT * FROM user_api_usage WHERE userID = ${id}`
+        const usage = await sql`SELECT * FROM user_api_usage`;
         res.json(usage);
       } catch (error) {
         console.error('Error executing query', error);
