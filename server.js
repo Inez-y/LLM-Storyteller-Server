@@ -101,6 +101,21 @@ async function startServer() {
       }
     });
 
+    // Delete user endpoint using a parameterized query
+    app.delete('/delete-user', async (req, res) => {
+      const { id } = req.body; // Ensure the client sends the user id in the request body
+      try {
+        await sql`
+          DELETE FROM users
+          WHERE id = ${id}
+        `;
+        res.status(200).json({ message: 'User deleted successfully' });
+      } catch (error) {
+        console.error('Delete error:', error);
+        res.status(500).json({ error: 'Delete user failed' });
+      }
+    });
+
     // gpt server
     app.post('/landing', async (req, res) => {
       console.log("Connecting to GPT...");
