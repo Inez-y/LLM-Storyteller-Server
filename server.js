@@ -47,6 +47,26 @@ async function startServer() {
       }
     });
 
+    app.get('/get-user-usage', async (req, res) => {
+      try {
+        const usage = await sql`SELECT * FROM user_api_usage WHERE userID = ${id}`
+        res.json(usage);
+      } catch (error) {
+        console.error('Error executing query', error);
+        res.status(500).send('Database query error');
+      }
+    });
+
+    app.get('/get-api-usage', async (req, res) => {
+      try {
+        const usage = await sql`SELECT * FROM api_stats`;
+        res.json(usage);
+      } catch (error) {
+        console.error('Error executing query: ', error);
+        res.status(500).send('Database query error');
+      }
+    });
+
     // Login endpoint using a parameterized query
     app.post('/login', async (req, res) => {
       const { username, password } = req.body;
@@ -115,7 +135,7 @@ async function startServer() {
         res.status(500).json({ error: 'Delete user failed' });
       }
     });
-    
+
     app.patch('/update-user', async (req, res) => {
       const { id, username, password } = req.body;
       try {
