@@ -136,7 +136,7 @@ async function startServer() {
       }
     });
 
-    app.patch('/update-user', async (req, res) => {
+    app.put('/update-user', async (req, res) => {
       const { id, username, password } = req.body;
       try {
         // Check if the new username is already taken by another user.
