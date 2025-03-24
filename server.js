@@ -101,6 +101,37 @@ async function startServer() {
       }
     });
 
+    app.patch('/update-user', async (req, res) => {
+      const { id, username, password } = req.body;
+      try {
+        // Check if the new username is already taken by another user.
+        const existingUsers = await sql`
+          SELECT * FROM users 
+          WHERE username = ${username} AND id != ${id}
+        `;
+        if (existingUsers.length > 0) {
+          return res.status(400).json({ error: 'Username already exists' });
+        }
+        
+        // Update the user's username and password using a parameterized query.
+        const result = await sql`
+          UPDATE users
+          SET username = ${username}, password = ${password}
+          WHERE id = ${id}
+          RETURNING *
+        `;
+        
+        if (result.length === 0) {
+          return res.status(404).json({ error: 'User not found' });
+        }
+        
+        res.status(200).json({ message: 'User updated successfully', user: result[0] });
+      } catch (error) {
+        console.error('Update error:', error);
+        res.status(500).json({ error: 'User update failed' });
+      }
+    });
+
     // gpt server
     app.post('/landing', async (req, res) => {
       console.log("Connecting to GPT...");
