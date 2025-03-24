@@ -137,35 +137,61 @@ async function startServer() {
     });
 
     app.put('/update-user', async (req, res) => {
-      const { id, username, password } = req.body;
+      // Destructure the id and all other properties (should only be one)
+      const { id, ...updateFields } = req.body;
+    
+      // Ensure exactly one field is provided for update.
+      const fields = Object.keys(updateFields);
+      if (fields.length !== 1) {
+        return res.status(400).json({ error: 'Invalid request: exactly one field must be updated.' });
+      }
+    
+      const field = fields[0];
+      const newValue = updateFields[field];
+    
       try {
-        // Check if the new username is already taken by another user.
-        const existingUsers = await sql`
-          SELECT * FROM users 
-          WHERE username = ${username} AND id != ${id}
-        `;
-        if (existingUsers.length > 0) {
-          return res.status(400).json({ error: 'Username already exists' });
+        // If updating the username, ensure it is not taken by another user.
+        if (field === 'username') {
+          const existingUsers = await sql`
+            SELECT * FROM users 
+            WHERE username = ${newValue} AND id != ${id}
+          `;
+          if (existingUsers.length > 0) {
+            return res.status(400).json({ error: 'Username already exists' });
+          }
         }
-        
-        // Update the user's username and password using a parameterized query.
-        const result = await sql`
-          UPDATE users
-          SET username = ${username}, password = ${password}
-          WHERE id = ${id}
-          RETURNING *
-        `;
-        
+    
+        // Update the specified field.
+        let result;
+        if (field === 'username') {
+          result = await sql`
+            UPDATE users
+            SET username = ${newValue}
+            WHERE id = ${id}
+            RETURNING *
+          `;
+        } else if (field === 'password') {
+          result = await sql`
+            UPDATE users
+            SET password = ${newValue}
+            WHERE id = ${id}
+            RETURNING *
+          `;
+        } else {
+          return res.status(400).json({ error: 'Invalid field provided. Only "username" or "password" can be updated.' });
+        }
+    
         if (result.length === 0) {
           return res.status(404).json({ error: 'User not found' });
         }
-        
+    
         res.status(200).json({ message: 'User updated successfully', user: result[0] });
       } catch (error) {
         console.error('Update error:', error);
         res.status(500).json({ error: 'User update failed' });
       }
     });
+    
 
     // gpt server
     app.post('/landing', async (req, res) => {
