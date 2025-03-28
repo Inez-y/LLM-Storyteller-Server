@@ -193,39 +193,6 @@ paths:
                   error:
                     type: string
                     example: 'No response from GPT.'
-  /delete-user:
-    delete:
-      summary: Delete a user by ID
-      operationId: deleteUser
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id:
-                  type: integer
-      responses:
-        '200':
-          description: User deleted successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: 'User deleted successfully'
-        '404':
-          description: User not found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: 'User not found'
   /update-user:
     put:
       summary: Update a user's information
@@ -263,3 +230,36 @@ paths:
                   error:
                     type: string
                     example: 'Invalid field provided. Only "username" or "password" can be updated.'
+  /delete-user:
+    delete:
+      summary: Delete a user by ID
+      operationId: deleteUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'User deleted successfully'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 'User not found'
