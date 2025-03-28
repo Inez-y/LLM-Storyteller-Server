@@ -8,6 +8,13 @@ import cors from 'cors';
 import postgres from 'postgres';
 import OpenAI from 'openai';
 
+// for api specification
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
+
+const swaggerDocument = YAML.load('./path/to/your/swagger.yaml');
+app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 const connectionString = process.env.DATABASE_URL;
 const { sign } = jsonpkg;
 const app = express();
@@ -86,7 +93,7 @@ async function startServer() {
         });
 
         const isAdmin = user.isAdmin ? true : false;
-        res.json({ message: 'Logged in successfully' ,isAdmin: isAdmin});
+        res.json({ message: 'Logged in successfully', isAdmin: isAdmin });
       } catch (error) {
         console.error('Database query error:', error);
         res.status(500).json({ error: 'Database query error' });
@@ -139,16 +146,16 @@ async function startServer() {
     app.put('/update-user', async (req, res) => {
       // Destructure the id and all other properties (should only be one)
       const { id, ...updateFields } = req.body;
-    
+
       // Ensure exactly one field is provided for update.
       const fields = Object.keys(updateFields);
       if (fields.length !== 1) {
         return res.status(400).json({ error: 'Invalid request: exactly one field must be updated.' });
       }
-    
+
       const field = fields[0];
       const newValue = updateFields[field];
-    
+
       try {
         // If updating the username, ensure it is not taken by another user.
         if (field === 'username') {
@@ -160,7 +167,7 @@ async function startServer() {
             return res.status(400).json({ error: 'Username already exists' });
           }
         }
-    
+
         // Update the specified field.
         let result;
         if (field === 'username') {
@@ -180,54 +187,54 @@ async function startServer() {
         } else {
           return res.status(400).json({ error: 'Invalid field provided. Only "username" or "password" can be updated.' });
         }
-    
+
         if (result.length === 0) {
           return res.status(404).json({ error: 'User not found' });
         }
-    
+
         res.status(200).json({ message: 'User updated successfully', user: result[0] });
       } catch (error) {
         console.error('Update error:', error);
         res.status(500).json({ error: 'User update failed' });
       }
     });
-    
+
 
     // gpt server
     app.post('/landing', async (req, res) => {
       console.log("Connecting to GPT...");
       const client = new OpenAI({ apiKey: process.env.OPENAI_KEY });
-  
+
       try {
-          const userPrompt = req.body.prompt;
-          const response = await client.chat.completions.create({
-              model: "gpt-4o-audio-preview",
-              modalities: ["text", "audio"],
-              audio: { voice: "alloy", format: "wav" },
-              messages: [
-                { role: "system", content: "Text Response" },
-                { role: "user", content: userPrompt }
-              ],
-              store: true,
-          });
-  
-          console.log("Full GPT response:", JSON.stringify(response, null, 2));
-  
-          if (!response.choices || response.choices.length === 0) {
-              return res.status(500).json({ error: "No response from GPT." });
-          }
-  
-          const answer = response.choices[0].message.audio?.transcript || "No text response";
-          const answer_voice = response.choices[0].message.audio?.data || null;
-  
-          console.log("GPT Answer:", answer);
-          console.log("Audio Base64:", answer_voice ? "Received" : "Not received");
-  
-          res.json({ response: answer, audio: answer_voice });
-  
+        const userPrompt = req.body.prompt;
+        const response = await client.chat.completions.create({
+          model: "gpt-4o-audio-preview",
+          modalities: ["text", "audio"],
+          audio: { voice: "alloy", format: "wav" },
+          messages: [
+            { role: "system", content: "Text Response" },
+            { role: "user", content: userPrompt }
+          ],
+          store: true,
+        });
+
+        console.log("Full GPT response:", JSON.stringify(response, null, 2));
+
+        if (!response.choices || response.choices.length === 0) {
+          return res.status(500).json({ error: "No response from GPT." });
+        }
+
+        const answer = response.choices[0].message.audio?.transcript || "No text response";
+        const answer_voice = response.choices[0].message.audio?.data || null;
+
+        console.log("GPT Answer:", answer);
+        console.log("Audio Base64:", answer_voice ? "Received" : "Not received");
+
+        res.json({ response: answer, audio: answer_voice });
+
       } catch (error) {
-          console.error("Error:", error);
-          res.status(500).json({ error: error.message });
+        console.error("Error:", error);
+        res.status(500).json({ error: error.message });
       }
     });
 
