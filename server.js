@@ -13,7 +13,6 @@ import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 
 const swaggerDocument = YAML.load('./swagger.yaml');
-app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 const connectionString = process.env.DATABASE_URL;
 const { sign } = jsonpkg;
@@ -21,6 +20,7 @@ const app = express();
 
 app.use(express.json()); // add express
 app.use(cookieParser());
+app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Configure CORS for your specific client origin and enable credentials if needed.
 app.use(cors({
