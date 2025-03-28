@@ -12,7 +12,7 @@ import OpenAI from 'openai';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 
-const swaggerDocument = YAML.load('./path/to/your/swagger.yaml');
+const swaggerDocument = YAML.load('./swagger.yaml');
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 const connectionString = process.env.DATABASE_URL;
