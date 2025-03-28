@@ -70,6 +70,21 @@ paths:
                       type: string
                     usage_count:
                       type: integer
+  /logout:
+    get:
+      summary: Logout endpoint
+      operationId: logout
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Logged out successfully'
   /login:
     post:
       summary: Login endpoint
@@ -143,21 +158,41 @@ paths:
                   error:
                     type: string
                     example: 'Username already exists'
-  /logout:
-    get:
-      summary: Logout endpoint
-      operationId: logout
+  /landing:
+    post:
+      summary: Generate GPT response
+      operationId: landing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prompt:
+                  type: string
       responses:
         '200':
-          description: Logout successful
+          description: Successful GPT response
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message:
+                  response:
                     type: string
-                    example: 'Logged out successfully'
+                  audio:
+                    type: string
+                    format: base64
+        '500':
+          description: No response from GPT
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 'No response from GPT.'
   /delete-user:
     delete:
       summary: Delete a user by ID
@@ -228,38 +263,3 @@ paths:
                   error:
                     type: string
                     example: 'Invalid field provided. Only "username" or "password" can be updated.'
-  /landing:
-    post:
-      summary: Generate GPT response
-      operationId: landing
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                prompt:
-                  type: string
-      responses:
-        '200':
-          description: Successful GPT response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  response:
-                    type: string
-                  audio:
-                    type: string
-                    format: base64
-        '500':
-          description: No response from GPT
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: 'No response from GPT.'
