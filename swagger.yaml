@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Storyteller
-  description: This is the API documentation for the server based on the OpenAPI 3.0 specification.
+  description: This is the API documentation for the Storyteller server based on the OpenAPI 3.0 specification.
   version: 1.0.0
 paths:
   /:
@@ -34,6 +34,42 @@ paths:
                       type: integer
                     username:
                       type: string
+  /get-user-usage:
+    get:
+      summary: Get all user API usage data
+      operationId: getUserUsage
+      responses:
+        '200':
+          description: User API usage data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    usage_count:
+                      type: integer
+  /get-api-usage:
+    get:
+      summary: Get overall API usage data
+      operationId: getApiUsage
+      responses:
+        '200':
+          description: API usage data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    api_name:
+                      type: string
+                    usage_count:
+                      type: integer
   /login:
     post:
       summary: Login endpoint
@@ -107,3 +143,123 @@ paths:
                   error:
                     type: string
                     example: 'Username already exists'
+  /logout:
+    get:
+      summary: Logout endpoint
+      operationId: logout
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Logged out successfully'
+  /delete-user:
+    delete:
+      summary: Delete a user by ID
+      operationId: deleteUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'User deleted successfully'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 'User not found'
+  /update-user:
+    put:
+      summary: Update a user's information
+      operationId: updateUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'User updated successfully'
+        '400':
+          description: Invalid field provided
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 'Invalid field provided. Only "username" or "password" can be updated.'
+  /landing:
+    post:
+      summary: Generate GPT response
+      operationId: landing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prompt:
+                  type: string
+      responses:
+        '200':
+          description: Successful GPT response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: string
+                  audio:
+                    type: string
+                    format: base64
+        '500':
+          description: No response from GPT
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 'No response from GPT.'
