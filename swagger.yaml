@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  title: Storyteller
-  description: This is the API documentation for the Storyteller server based on the OpenAPI 3.0 specification.
+  title: MyDuolingo
+  description: This is the API documentation for the MyDuolingo server based on the OpenAPI 3.0 specification.
   version: 1.0.0
 paths:
   /:
