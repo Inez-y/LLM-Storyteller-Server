@@ -70,6 +70,38 @@ paths:
                       type: string
                     usage_count:
                       type: integer
+  /t2t:
+    get:
+      summary: Translate text using hosted LLM
+      operationId: translateText
+      parameters:
+        - in: query
+          name: prompt
+          required: true
+          schema:
+            type: string
+          description: The text prompt to be translated.
+      responses:
+        '200':
+          description: Successfully translated text
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  translatedText:
+                    type: string
+                    example: "This is the translated text."
+        '500':
+          description: Error during translation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Error during translation"
   /logout:
     get:
       summary: Logout endpoint
