@@ -43,7 +43,7 @@ async function translateText(prompt) {
     const response = await axios.get(apiUrl);
 
     // Return the translated text (adjust based on the actual response format)
-    return response.data.translatedText || 'Translation failed';
+    return response.data.generated_text || 'Translation failed';
   } catch (error) {
     console.error('Error during translation:', error);
     throw new Error('Translation API request failed');
