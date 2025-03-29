@@ -80,7 +80,7 @@ paths:
           required: true
           schema:
             type: string
-          description: The text prompt to be translated. Enter as "Translate to French:Hello world" without double quote.
+          description: The text prompt to be translated. <br> To translate enter as "Translate to French:Hello world" without double quote. <br> To get an answer about a question enter as "Please answer to the following question. Who is going to be the next Ballon d'or?" without double quote.
       responses:
         '200':
           description: Successfully translated text
