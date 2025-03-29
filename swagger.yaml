@@ -80,7 +80,7 @@ paths:
           required: true
           schema:
             type: string
-          description: The text prompt to be translated. Enter as "Translate+to+Spanish%3A+Hello+world" without double quote.
+          description: The text prompt to be translated. Enter as "Translate to French:Hello world" without double quote.
       responses:
         '200':
           description: Successfully translated text
