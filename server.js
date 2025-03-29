@@ -74,6 +74,18 @@ async function startServer() {
       }
     });
 
+    // req to hosted LLM
+    app.get('/t2t', async (req, res) => {
+      const prompt = req.query.prompt; // parse from url
+      try {
+        const translatedText = await translateText(prompt);
+        res.json({ translatedText });
+      } catch (error) {
+        console.error('Error during translation:', error);
+        res.status(500).send('Error during translation');
+      }
+    });
+
     // Login endpoint using a parameterized query
     app.post('/login', async (req, res) => {
       const { username, password } = req.body;
@@ -199,9 +211,8 @@ async function startServer() {
       }
     });
 
-
     // gpt server
-    app.post('/landing', async (req, res) => {
+    app.post('/gpt-talk', async (req, res) => {
       console.log("Connecting to GPT...");
       const client = new OpenAI({ apiKey: process.env.OPENAI_KEY });
 
