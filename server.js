@@ -6,6 +6,8 @@ import jsonpkg from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import postgres from 'postgres';
+
+import axios from 'axios';
 import OpenAI from 'openai';
 
 // for api specification
@@ -31,6 +33,22 @@ app.use(cors({
 }));
 
 const SECRET_KEY = process.env.SECRET_KEY_JWT;
+
+async function translateText(prompt) {
+  try {
+    // Construct the URL with the query parameter for the prompt
+    const apiUrl = `http://134.199.215.216:8000/t2t?prompt=${encodeURIComponent(prompt)}`;
+
+    // Make the GET request
+    const response = await axios.get(apiUrl);
+
+    // Return the translated text (adjust based on the actual response format)
+    return response.data.translatedText || 'Translation failed';
+  } catch (error) {
+    console.error('Error during translation:', error);
+    throw new Error('Translation API request failed');
+  }
+}
 
 async function startServer() {
   try {
