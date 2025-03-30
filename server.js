@@ -184,10 +184,12 @@ async function startServer() {
 
       try {
         const users = await sql`SELECT * FROM users WHERE username = ${username}`;
+        console.log(users);
         if (users.length === 0) {
           return res.status(401).json({ error: 'Invalid username or password' });
         }
         const user = users[0];
+        console.log(user);
         const match = await bcrypt.compare(password, user.password);
         if (!match) {
           return res.status(401).json({ error: 'Invalid username or password' });
