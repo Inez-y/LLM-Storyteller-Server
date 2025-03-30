@@ -32,7 +32,23 @@ app.use(cors({
   credentials: true
 }));
 
+// JWT 
+import { verify } from 'jsonwebtoken';
 const SECRET_KEY = process.env.SECRET_KEY_JWT;
+
+// Middleware to Decode JWT
+const authenticateUser = (req, res, next) => {
+  const token = req.cookies['auth-token'];
+  if (!token) return res.status(401).send('Unauthorized: No token provided');
+
+  try {
+    const decoded = verify(token, SECRET_KEY);
+    req.user = decoded; // contains id and username
+    next();
+  } catch (err) {
+    return res.status(403).send('Unauthorized: Invalid token');
+  }
+};
 
 async function translateText(prompt) {
   try {
@@ -61,6 +77,17 @@ async function startServer() {
       res.status(200).send('OK');
     });
 
+    // Return user info
+    app.get('/me', authenticateUser, async (req, res) => {
+      const userId = req.user.id;
+      try {
+        const [user] = await sql`SELECT id, username, isAdmin, totalAPINum FROM users WHERE id = ${userId}`;
+        res.json(user);
+      } catch (err) {
+        res.status(500).send('Failed to fetch user');
+      }
+    });
+    
     // Define a route that queries the database.
     app.get('/get-users', async (req, res) => {
       try {
@@ -84,8 +111,8 @@ async function startServer() {
     });
 
     // Update user API usage
-    app.post('/update-user-usage', async (req, res) => {
-      const userId = req.session.userId;
+    app.post('/update-user-usage', authenticateUser, async (req, res) => {
+      const userId = req.user.id;
       if (!userId) return res.status(401).send('Not logged in');
 
       const { isSuccess } = req.body;
