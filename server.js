@@ -40,20 +40,6 @@ app.use(cors({
 // JWT 
 const SECRET_KEY = process.env.SECRET_KEY_JWT;
 
-// Middleware to Decode JWT
-const authenticateUser = (req, res, next) => {
-  const token = req.cookies['auth-token'];
-  if (!token) return res.status(401).send('Unauthorized: No token provided');
-
-  try {
-    const decoded = verify(token, SECRET_KEY);
-    req.user = decoded; // contains id and username
-    next();
-  } catch (err) {
-    return res.status(403).send('Unauthorized: Invalid token');
-  }
-};
-
 // sanity check for username
 function validateEmail(email) {
   const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
@@ -88,7 +74,7 @@ async function startServer() {
     });
 
     // Return user info
-    app.get('/me', authenticateUser, async (req, res) => {
+    app.get('/me', async (req, res) => {
       const userId = req.user.id;
       try {
         const [user] = await sql`SELECT id, username, isAdmin, totalAPINum FROM users WHERE id = ${userId}`;
@@ -121,7 +107,7 @@ async function startServer() {
     });
 
     // Update user API usage
-    app.post('/update-user-usage', authenticateUser, async (req, res) => {
+    app.post('/update-user-usage', async (req, res) => {
       const userId = req.user.id;
       if (!userId) return res.status(401).send('Not logged in');
 
@@ -178,21 +164,22 @@ async function startServer() {
     // Login endpoint using a parameterized query
     app.post('/login', async (req, res) => {
       const { username, password } = req.body;
+
       if (!validateEmail(username)) {
         return res.status(400).json({ error: 'Invalid email format' });
       }
 
       try {
         const users = await sql`SELECT * FROM users WHERE username = ${username}`;
-        console.log(users);
+
         if (users.length === 0) {
-          return res.status(401).json({ error: 'Invalid username or password' });
+          return res.status(401).json({ error: 'Invalid username or password- users length 0' });
         }
         const user = users[0];
-        console.log(user);
+
         const match = await bcrypt.compare(password, user.password);
         if (!match) {
-          return res.status(401).json({ error: 'Invalid username or password' });
+          return res.status(401).json({ error: 'Invalid username or password - password doesnt match' });
         }
         const token = sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
         res.cookie('auth-token', token, {
