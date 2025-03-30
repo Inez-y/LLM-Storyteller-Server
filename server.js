@@ -24,15 +24,6 @@ app.use(express.json()); // add express
 app.use(cookieParser());
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Middleware
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Origin', 'https://storyteller-us7ph.ondigitalocean.app');
-  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-  next();
-});
-
 // Configure CORS for your specific client origin and enable credentials if needed.
 app.use(cors({
   origin: 'https://storyteller-us7ph.ondigitalocean.app', // Exact match required when using credentials.
