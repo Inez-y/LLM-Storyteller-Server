@@ -188,7 +188,7 @@ async function startServer() {
           return res.status(401).json({ error: 'Invalid username or password' });
         }
         const user = users[0];
-        const match = await bcrypt.compare(password, user.password)
+        const match = await bcrypt.compare(password, user.password);
         if (!match) {
           return res.status(401).json({ error: 'Invalid username or password' });
         }
