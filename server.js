@@ -52,6 +52,12 @@ const authenticateUser = (req, res, next) => {
   }
 };
 
+// sanity check for username
+function validateEmail(email) {
+  const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+  return emailPattern.test(email);
+}
+
 async function translateText(prompt) {
   try {
     // Construct the URL with the query parameter for the prompt
@@ -89,7 +95,7 @@ async function startServer() {
         res.status(500).send('Failed to fetch user');
       }
     });
-    
+
     // Define a route that queries the database.
     app.get('/get-users', async (req, res) => {
       try {
@@ -121,7 +127,7 @@ async function startServer() {
 
       try {
         const existing = await sql`SELECT * FROM user_api_usage WHERE user_id = ${userId}`;
-        
+
         if (existing.length > 0) {
           // Update existing user usage
           await sql`
@@ -170,6 +176,10 @@ async function startServer() {
     // Login endpoint using a parameterized query
     app.post('/login', async (req, res) => {
       const { username, password } = req.body;
+      if (!validateEmail(username)) {
+        return res.status(400).json({ error: 'Invalid email format' });
+      }
+
       try {
         const users = await sql`SELECT * FROM users WHERE username = ${username}`;
         if (users.length === 0) {
@@ -202,6 +212,10 @@ async function startServer() {
     // Register endpoint using a parameterized INSERT query with RETURNING clause
     app.post('/register', async (req, res) => {
       const { username, password } = req.body;
+      if (!validateEmail(username)) {
+        return res.status(400).json({ error: 'Invalid email format' });
+      }
+
       try {
         // Check if the username already exists
         const existingUsers = await sql`SELECT * FROM users WHERE username = ${username}`;
