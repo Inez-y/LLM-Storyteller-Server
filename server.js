@@ -20,6 +20,9 @@ const connectionString = process.env.DATABASE_URL;
 const { sign } = jsonpkg;
 const app = express();
 
+// JWT
+import { verify } from 'jsonwebtoken';
+
 app.use(express.json()); // add express
 app.use(cookieParser());
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
@@ -33,7 +36,6 @@ app.use(cors({
 }));
 
 // JWT 
-import { verify } from 'jsonwebtoken';
 const SECRET_KEY = process.env.SECRET_KEY_JWT;
 
 // Middleware to Decode JWT
