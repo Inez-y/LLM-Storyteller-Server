@@ -21,7 +21,8 @@ const { sign } = jsonpkg;
 const app = express();
 
 // JWT
-import { verify } from 'jsonwebtoken';
+import jsonwebtoken from 'jsonwebtoken';
+const { verify } = jsonwebtoken;
 
 app.use(express.json()); // add express
 app.use(cookieParser());
