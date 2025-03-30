@@ -72,6 +72,7 @@ async function startServer() {
       }
     });
 
+    // Get total api usage number from a user
     app.get('/get-user-usage', async (req, res) => {
       try {
         const usage = await sql`SELECT * FROM user_api_usage`;
@@ -82,9 +83,42 @@ async function startServer() {
       }
     });
 
-    app.get('/get-api-usage', async (req, res) => {
+    // Update user API usage
+    app.post('/update-user-usage', async (req, res) => {
+      const userId = req.session.userId;
+      if (!userId) return res.status(401).send('Not logged in');
+
+      const { isSuccess } = req.body;
+
       try {
-        const usage = await sql`SELECT * FROM api_stats`;
+        const existing = await sql`SELECT * FROM user_api_usage WHERE user_id = ${userId}`;
+        
+        if (existing.length > 0) {
+          // Update existing user usage
+          await sql`
+            UPDATE user_api_usage 
+            SET 
+              total_calls = total_calls + 1,
+              ${isSuccess ? sql`successful_calls = successful_calls + 1` : sql`failed_calls = failed_calls + 1`}
+            WHERE user_id = ${userId}`;
+        } else {
+          // Insert new user usage row
+          await sql`
+            INSERT INTO user_api_usage (user_id, total_calls, successful_calls, failed_calls)
+            VALUES (${userId}, 1, ${isSuccess ? 1 : 0}, ${isSuccess ? 0 : 1})`;
+        }
+
+        res.status(200).send('Usage updated');
+      } catch (error) {
+        console.error('Error updating usage:', error);
+        res.status(500).send('Database update error');
+      }
+    });
+
+    // List of all endpoints and their corresponding stats - Method, endpoint, usage
+    app.get('/get-endpoint-usage', async (req, res) => {
+      try {
+        const usage = await sql`SELECT * FROM endpoint_stats`;
         res.json(usage);
       } catch (error) {
         console.error('Error executing query: ', error);
@@ -92,7 +126,7 @@ async function startServer() {
       }
     });
 
-    // req to hosted LLM
+    // req to hosted LLM [Translation]
     app.get('/t2t', async (req, res) => {
       const prompt = req.query.prompt; // parse from url
       try {
