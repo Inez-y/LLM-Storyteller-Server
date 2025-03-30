@@ -6,6 +6,7 @@ import jsonpkg from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import postgres from 'postgres';
+import bcrypt from 'bcrypt';
 
 import axios from 'axios';
 import OpenAI from 'openai';
@@ -187,7 +188,8 @@ async function startServer() {
           return res.status(401).json({ error: 'Invalid username or password' });
         }
         const user = users[0];
-        if (user.password !== password) {
+        const match = await bcrypt.compare(password, user.password)''
+        if (!match) {
           return res.status(401).json({ error: 'Invalid username or password' });
         }
         const token = sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
@@ -223,6 +225,10 @@ async function startServer() {
         if (existingUsers.length > 0) {
           return res.status(400).json({ error: 'Username already exists' });
         }
+
+        const saltRounds = 10;
+        const hashedPW = await bcrypt.hash(password, saltRounds);
+
         // Insert new user and return the inserted id.
         const result = await sql`
           INSERT INTO users (username, password)
