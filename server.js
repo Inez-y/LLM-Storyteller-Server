@@ -24,9 +24,23 @@ const connectionString = process.env.DATABASE_URL;
 const { sign } = jsonpkg;
 const app = express();
 
+let sql;
+
 app.use(express.json()); // add express
 app.use(cookieParser());
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+// Initialize the database connection early so it's available to all functions.
+async function initializeDb() {
+  try {
+    sql = postgres(connectionString);
+    // Optional: Test the connection with a simple query
+    await sql`SELECT 1`;
+    console.log('Database connection established.');
+  } catch (error) {
+    console.error('Error connecting to the database:', error);
+  }
+}
 
 // Debugging
 app.use(async (req, res, next) => {
@@ -117,7 +131,8 @@ async function translateText(prompt) {
 async function startServer() {
   try {
     // Establish a connection to the database using environment variables.
-    const sql = postgres(connectionString);
+    await initializeDb();
+
     console.log('Connected to the database!');
 
     // Health Check endpoint
