@@ -198,6 +198,7 @@ async function startServer() {
     // logout by deleting cookie
     app.get('/logout', (req, res) => {
       res.clearCookie('auth-token');
+      res.status(200).json({message: 'Logged out successfully.'})
     });
 
     // Register endpoint using a parameterized INSERT query with RETURNING clause
