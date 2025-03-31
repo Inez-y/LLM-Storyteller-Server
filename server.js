@@ -96,8 +96,8 @@ async function startServer() {
     });
 
     // Return user info
-    app.get('/me', async (req, res) => {
-      const userId = req.user.id; // where the id come from
+    app.get('/me', authenticateToken, async (req, res) => {
+      const userId = req.user.id; // now this should be defined
       try {
         const [user] = await sql`SELECT id, username, isAdmin, totalAPINum FROM users WHERE id = ${userId}`;
         res.json(user);
@@ -105,6 +105,7 @@ async function startServer() {
         res.status(500).send('Failed to fetch user');
       }
     });
+    
 
     // Define a route that queries the database.
     app.get('/get-users', async (req, res) => {
