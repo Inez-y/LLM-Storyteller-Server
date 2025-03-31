@@ -198,7 +198,6 @@ async function startServer() {
     // logout by deleting cookie
     app.get('/logout', (req, res) => {
       res.clearCookie('auth-token');
-      res.redirect('https://storyteller-us7ph.ondigitalocean.app/');
     });
 
     // Register endpoint using a parameterized INSERT query with RETURNING clause
