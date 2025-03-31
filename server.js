@@ -18,7 +18,8 @@ import YAML from 'yamljs';
 const swaggerDocument = YAML.load('./swagger.yaml');
 
 // Middleware to tracking user id
-import { authenticateToken } from './middleware/auth.js';
+// import { authenticateToken } from './middleware/auth.js';
+import { verify } from 'jsonwebtoken';
 
 const connectionString = process.env.DATABASE_URL;
 const { sign } = jsonpkg;
@@ -43,6 +44,23 @@ app.use(cors({
 }));
 
 const SECRET_KEY = process.env.SECRET_KEY_JWT;
+
+// Middleware
+function authenticateToken(req, res, next) {
+  const token = req.cookies['auth-token'];
+  if (!token) {
+    return res.status(401).json({ error: 'Access denied. No token provided.' });
+  }
+
+  try {
+    const decoded = verify(token, SECRET_KEY);
+    req.user = decoded; // decoded contains: { id, username }
+    next();
+  } catch (err) {
+    console.error('Invalid token:', err);
+    res.status(403).json({ error: 'Invalid token' });
+  }
+}
 
 // sanity check for username
 function validateEmail(email) {
