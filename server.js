@@ -130,42 +130,45 @@ async function startServer() {
     });
 
     // Update user API usage with authentication middleware
-app.post('/update-user-usage', authenticateToken, async (req, res) => {
-  // Now req.user contains the decoded token payload
-  const userId = req.user.id;
-  console.log("User ID from token:", userId);
-
-  if (!userId) return res.status(401).send('Not logged in');
-
-  const { isSuccess } = req.body;
-  console.log(isSuccess, 'isSuccess');
-
-  try {
-    const existing = await sql`SELECT * FROM user_api_usage WHERE user_id = ${userId}`;
-
-    if (existing.length > 0) {
-      // Update existing user usage
-      await sql`
-        UPDATE user_api_usage 
-        SET 
-          total_calls = total_calls + 1,
-          ${isSuccess ? sql`successful_calls = successful_calls + 1` : sql`failed_calls = failed_calls + 1`}
-        WHERE user_id = ${userId}
-      `;
-    } else {
-      // Insert new user usage row
-      await sql`
-        INSERT INTO user_api_usage (user_id, total_calls, successful_calls, failed_calls)
-        VALUES (${userId}, 1, ${isSuccess ? 1 : 0}, ${isSuccess ? 0 : 1})
-      `;
-    }
-
-    res.status(200).send('Usage updated');
-  } catch (error) {
-    console.error('Error updating usage:', error);
-    res.status(500).send('Database update error');
-  }
-});
+    app.post('/update-user-usage', authenticateToken, async (req, res) => {
+      // Now req.user contains the decoded token payload
+      const userId = req.user.id;
+      console.log("User ID from token:", userId);
+    
+      if (!userId) return res.status(401).send('Not logged in');
+    
+      // Extract the usage values from req.body
+      const { successful_calls, failed_calls, total_calls } = req.body;
+      console.log('Received usage:', { successful_calls, failed_calls, total_calls });
+    
+      try {
+        const existing = await sql`SELECT * FROM user_api_usage WHERE user_id = ${userId}`;
+    
+        if (existing.length > 0) {
+          // Update the existing record by incrementing each counter with the values provided in the request
+          await sql`
+            UPDATE user_api_usage 
+            SET 
+              total_calls = total_calls + ${total_calls},
+              successful_calls = successful_calls + ${successful_calls},
+              failed_calls = failed_calls + ${failed_calls}
+            WHERE user_id = ${userId}
+          `;
+        } else {
+          // Insert a new row if no record exists for the user
+          await sql`
+            INSERT INTO user_api_usage (user_id, total_calls, successful_calls, failed_calls)
+            VALUES (${userId}, ${total_calls}, ${successful_calls}, ${failed_calls})
+          `;
+        }
+    
+        res.status(200).send('Usage updated');
+      } catch (error) {
+        console.error('Error updating usage:', error);
+        res.status(500).send('Database update error');
+      }
+    });
+    
 
 
     // List of all endpoints and their corresponding stats - Method, endpoint, usage
