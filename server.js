@@ -50,23 +50,22 @@ function validateEmail(email) {
 
 // Authentication middleware to verify JWT token and attach decoded user to req.user
 function authenticateToken(req, res, next) {
-  // Get token from cookies (or you could check req.headers.authorization)
-  const token = req.cookies['auth-token'] || (req.headers.authorization && req.headers.authorization.split(' ')[1]);
-
+  const token = req.cookies['auth-token'] || 
+                (req.headers.authorization && req.headers.authorization.split(' ')[1]);
+  console.log('Received token:', token);
   if (!token) {
     return res.status(401).json({ error: 'Access denied. No token provided.' });
   }
-
-  // Verify token
   jsonpkg.verify(token, SECRET_KEY, (err, decoded) => {
     if (err) {
+      console.error('Token verification error:', err);
       return res.status(403).json({ error: 'Invalid token.' });
     }
-    // Attach decoded token (which includes the user ID) to req.user
     req.user = decoded;
     next();
   });
 }
+
 
 
 async function translateText(prompt) {
@@ -219,9 +218,10 @@ async function startServer() {
         const token = sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
         res.cookie('auth-token', token, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === 'production'
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
         });
-
+        
         const isAdmin = user.isAdmin ? true : false;
         res.json({ message: 'Logged in successfully', isAdmin: isAdmin });
       } catch (error) {
