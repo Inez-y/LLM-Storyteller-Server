@@ -27,8 +27,9 @@ app.use(cookieParser());
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Debugging
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   console.log('Incoming request origin:', req.headers.origin);
+  await logEndpointUsage(req.originalUrl, req.method);
   next();
 });
 
@@ -66,6 +67,33 @@ function authenticateToken(req, res, next) {
   });
 }
 
+// Helper function to log endpoint usage
+async function logEndpointUsage(endpoint, method) {
+  try {
+    // Check if an entry already exists for this endpoint and method.
+    const existing = await sql`
+      SELECT * FROM endpoint_stats 
+      WHERE endpoint = ${endpoint} AND method = ${method}
+    `;
+    
+    if (existing.length > 0) {
+      // Update the existing record by incrementing the call count.
+      await sql`
+        UPDATE endpoint_stats 
+        SET call_count = call_count + 1 
+        WHERE endpoint = ${endpoint} AND method = ${method}
+      `;
+    } else {
+      // Insert a new record with an initial count of 1.
+      await sql`
+        INSERT INTO endpoint_stats (endpoint, method, call_count)
+        VALUES (${endpoint}, ${method}, 1)
+      `;
+    }
+  } catch (error) {
+    console.error('Error logging endpoint usage:', error);
+  }
+}
 
 
 async function translateText(prompt) {
@@ -387,6 +415,43 @@ async function startServer() {
         res.status(500).json({ error: error.message });
       }
     });
+
+    app.post('/add-endpoint-usage', async (req, res) => {
+      const { endpoint, method } = req.body;
+      
+      if (!endpoint || !method) {
+        return res.status(400).json({ error: 'Missing endpoint or method in request body' });
+      }
+    
+      try {
+        // Check if an entry already exists for this endpoint and method.
+        const existing = await sql`
+          SELECT * FROM endpoint_stats 
+          WHERE endpoint = ${endpoint} AND method = ${method}
+        `;
+        
+        if (existing.length > 0) {
+          // If found, update the record by incrementing the call count.
+          await sql`
+            UPDATE endpoint_stats 
+            SET usage = usage + 1 
+            WHERE endpoint = ${endpoint} AND method = ${method}
+          `;
+        } else {
+          // If not, insert a new record with an initial count of 1.
+          await sql`
+            INSERT INTO endpoint_stats (endpoint, method, usage)
+            VALUES (${endpoint}, ${method}, 1)
+          `;
+        }
+        
+        res.status(200).json({ message: 'Endpoint usage updated successfully.' });
+      } catch (error) {
+        console.error('Error updating endpoint usage:', error);
+        res.status(500).json({ error: 'Database update error' });
+      }
+    });
+    
 
     // Start the Express server.
     const port = process.env.PORT || 3000;
