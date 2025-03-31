@@ -29,6 +29,12 @@ app.use(express.json()); // add express
 app.use(cookieParser());
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+// Debugging
+app.use((req, res, next) => {
+  console.log('Incoming request origin:', req.headers.origin);
+  next();
+});
+
 // Configure CORS for your specific client origin and enable credentials if needed.
 app.use(cors({
   origin: 'https://storyteller-us7ph.ondigitalocean.app', // Exact match required when using credentials.
@@ -112,6 +118,7 @@ async function startServer() {
       if (!userId) return res.status(401).send('Not logged in');
 
       const { isSuccess } = req.body;
+      console.log(isSuccess, 'isSuccess');
 
       try {
         const existing = await sql`SELECT * FROM user_api_usage WHERE user_id = ${userId}`;
