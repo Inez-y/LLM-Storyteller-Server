@@ -17,13 +17,12 @@ import YAML from 'yamljs';
 
 const swaggerDocument = YAML.load('./swagger.yaml');
 
+// Middleware to tracking user id
+import * as authenticateToken from './middleware/auth.js';
+
 const connectionString = process.env.DATABASE_URL;
 const { sign } = jsonpkg;
 const app = express();
-
-// JWT
-// import jsonwebtoken from 'jsonwebtoken';
-// const { verify } = jsonwebtoken;
 
 app.use(express.json()); // add express
 app.use(cookieParser());
@@ -43,7 +42,6 @@ app.use(cors({
   credentials: true
 }));
 
-// JWT 
 const SECRET_KEY = process.env.SECRET_KEY_JWT;
 
 // sanity check for username
@@ -113,9 +111,10 @@ async function startServer() {
     });
 
     // Update user API usage
-    app.post('/update-user-usage', async (req, res) => {
+    app.post('/update-user-usage', authenticateToken, async (req, res) => {
       const userId = req.user.id;
       if (!userId) return res.status(401).send('Not logged in');
+      console.log("userid", userId);
 
       const { isSuccess } = req.body;
       console.log(isSuccess, 'isSuccess');
