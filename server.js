@@ -149,9 +149,9 @@ async function startServer() {
           await sql`
             UPDATE user_api_usage 
             SET 
-              total_calls = total_calls + ${total_calls},
-              successful_calls = successful_calls + ${successful_calls},
-              failed_calls = failed_calls + ${failed_calls}
+              total_calls = ${total_calls},
+              successful_calls = ${successful_calls},
+              failed_calls = ${failed_calls}
             WHERE user_id = ${userId}
           `;
         } else {
