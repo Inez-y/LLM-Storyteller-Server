@@ -1,3 +1,5 @@
+// This code was completed with the help of ChatGPT
+
 import dotenv from 'dotenv';
 dotenv.config();
 
