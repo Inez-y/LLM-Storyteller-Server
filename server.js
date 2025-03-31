@@ -96,13 +96,13 @@ async function logEndpointUsage(endpoint, method) {
       // Update the existing record by incrementing the call count.
       await sql`
         UPDATE endpoint_stats 
-        SET call_count = call_count + 1 
+        SET usage = usage + 1 
         WHERE endpoint = ${endpoint} AND method = ${method}
       `;
     } else {
       // Insert a new record with an initial count of 1.
       await sql`
-        INSERT INTO endpoint_stats (endpoint, method, call_count)
+        INSERT INTO endpoint_stats (endpoint, method, usage)
         VALUES (${endpoint}, ${method}, 1)
       `;
     }
