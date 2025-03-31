@@ -1,5 +1,5 @@
 // Middleware to keep tracking id
-import * as verify from 'jsonwebtoken';
+import { verify } from 'jsonwebtoken';
 
 export function authenticateToken(req, res, next) {
   const token = req.cookies['auth-token'];
