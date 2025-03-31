@@ -129,6 +129,18 @@ async function startServer() {
       }
     });
 
+    app.get('/get-self-usage',authenticateToken , async(req, res) => {
+      const userId = req.user.id;
+      console.log("User ID from token:", userId);
+      try {
+        const usage = await sql`SELECT * FROM user_api_usage WHERE user_id = ${userId}`
+        res.json(usage);
+      } catch (error) {
+        console.error('Error executing query', error);
+        res.status(500).send('Database query error');
+      }
+    });
+
     // Update user API usage with authentication middleware
     app.post('/update-user-usage', authenticateToken, async (req, res) => {
       // Now req.user contains the decoded token payload
