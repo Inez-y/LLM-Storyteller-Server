@@ -221,7 +221,7 @@ async function startServer() {
         // Insert new user and return the inserted id.
         const result = await sql`
           INSERT INTO users (username, password)
-          VALUES (${username}, ${password})
+          VALUES (${username}, ${hashedPW})
           RETURNING id
         `;
         res.status(201).json({ message: 'User registered successfully', userId: result[0].id });
