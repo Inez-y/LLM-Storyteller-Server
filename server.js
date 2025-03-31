@@ -48,6 +48,27 @@ function validateEmail(email) {
   return emailPattern.test(email);
 }
 
+// Authentication middleware to verify JWT token and attach decoded user to req.user
+function authenticateToken(req, res, next) {
+  // Get token from cookies (or you could check req.headers.authorization)
+  const token = req.cookies['auth-token'] || (req.headers.authorization && req.headers.authorization.split(' ')[1]);
+
+  if (!token) {
+    return res.status(401).json({ error: 'Access denied. No token provided.' });
+  }
+
+  // Verify token
+  jsonpkg.verify(token, SECRET_KEY, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ error: 'Invalid token.' });
+    }
+    // Attach decoded token (which includes the user ID) to req.user
+    req.user = decoded;
+    next();
+  });
+}
+
+
 async function translateText(prompt) {
   try {
     // Construct the URL with the query parameter for the prompt
@@ -108,40 +129,44 @@ async function startServer() {
       }
     });
 
-    // Update user API usage
-    app.post('/update-user-usage', async (req, res) => {
-      const userId = req.user.id;
-      console.log("userid", userId);
+    // Update user API usage with authentication middleware
+app.post('/update-user-usage', authenticateToken, async (req, res) => {
+  // Now req.user contains the decoded token payload
+  const userId = req.user.id;
+  console.log("User ID from token:", userId);
 
-      if (!userId) return res.status(401).send('Not logged in');
-    
-      const { isSuccess } = req.body;
-      console.log(isSuccess, 'isSuccess');
+  if (!userId) return res.status(401).send('Not logged in');
 
-      try {
-        const existing = await sql`SELECT * FROM user_api_usage WHERE user_id = ${userId}`;
+  const { isSuccess } = req.body;
+  console.log(isSuccess, 'isSuccess');
 
-        if (existing.length > 0) {
-          // Update existing user usage
-          await sql`
-            UPDATE user_api_usage 
-            SET 
-              total_calls = total_calls + 1,
-              ${isSuccess ? sql`successful_calls = successful_calls + 1` : sql`failed_calls = failed_calls + 1`}
-            WHERE user_id = ${userId}`;
-        } else {
-          // Insert new user usage row
-          await sql`
-            INSERT INTO user_api_usage (user_id, total_calls, successful_calls, failed_calls)
-            VALUES (${userId}, 1, ${isSuccess ? 1 : 0}, ${isSuccess ? 0 : 1})`;
-        }
+  try {
+    const existing = await sql`SELECT * FROM user_api_usage WHERE user_id = ${userId}`;
 
-        res.status(200).send('Usage updated');
-      } catch (error) {
-        console.error('Error updating usage:', error);
-        res.status(500).send('Database update error');
-      }
-    });
+    if (existing.length > 0) {
+      // Update existing user usage
+      await sql`
+        UPDATE user_api_usage 
+        SET 
+          total_calls = total_calls + 1,
+          ${isSuccess ? sql`successful_calls = successful_calls + 1` : sql`failed_calls = failed_calls + 1`}
+        WHERE user_id = ${userId}
+      `;
+    } else {
+      // Insert new user usage row
+      await sql`
+        INSERT INTO user_api_usage (user_id, total_calls, successful_calls, failed_calls)
+        VALUES (${userId}, 1, ${isSuccess ? 1 : 0}, ${isSuccess ? 0 : 1})
+      `;
+    }
+
+    res.status(200).send('Usage updated');
+  } catch (error) {
+    console.error('Error updating usage:', error);
+    res.status(500).send('Database update error');
+  }
+});
+
 
     // List of all endpoints and their corresponding stats - Method, endpoint, usage
     app.get('/get-endpoint-usage', async (req, res) => {
