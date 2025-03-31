@@ -18,7 +18,7 @@ import YAML from 'yamljs';
 const swaggerDocument = YAML.load('./swagger.yaml');
 
 // Middleware to tracking user id
-import { verify } from 'jsonwebtoken';
+import verify from 'jsonwebtoken';
 
 const connectionString = process.env.DATABASE_URL;
 const { sign } = jsonpkg;
